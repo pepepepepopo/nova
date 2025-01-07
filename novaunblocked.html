@@ -1,0 +1,760 @@
+<html><head><base href=".">
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@700&amp;display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: transparent;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .header {
+            padding: 40px 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .search-bar {
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+            transform-origin: center;
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+        }
+
+        .search-bar:hover {
+            transform: scale(1.1);
+        }
+
+        .search-icon {
+            width: 20px;
+            height: 20px;
+            position: absolute;
+            left: 25px;
+            filter: invert(1) sepia(1) saturate(3) hue-rotate(315deg);
+            opacity: 0.8;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px 25px;
+            border-radius: 30px;
+            border: none;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 0 30px rgba(245, 78, 123, 0.2);
+            font-weight: bold;
+            padding-left: 55px; /* Add space for icon */
+        }
+
+        .search-input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 40px rgba(245, 78, 123, 0.4);
+        }
+
+        .launcher {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(250px, 1fr));
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .game-card {
+            position: relative;
+            height: 350px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            transform-origin: center;
+            box-shadow: 0 0 50px rgba(245, 78, 123, 0.2);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 0 70px rgba(245, 78, 123, 0.4);
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 20px;
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .game-card:hover::before {
+            border-color: #f54e7b;
+        }
+
+        .game-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .game-title {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            color: white;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            transform: translateY(100%);
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .game-card:hover .game-title {
+            transform: translateY(0);
+        }
+
+        .game-stats {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            padding: 8px 15px;
+            border-radius: 20px;
+            color: white;
+            font-size: 14px;
+            opacity: 0;
+            transform: translateX(20px);
+            transition: all 0.3s ease;
+        }
+
+        .game-card:hover .game-stats {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .game-fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 100;
+            display: none;
+            background: #000;
+        }
+
+        .game-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .flash, .black-flash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: white;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 200;
+        }
+
+        .black-flash {
+            background: black;
+        }
+
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 150;
+        }
+
+        .loading-screen img {
+            max-height: 80vh;
+            width: auto;
+            margin-bottom: 30px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .progress-bar {
+            width: 300px;
+            height: 10px;
+            background: rgba(245, 78, 123, 0.2);
+            border-radius: 5px;
+            overflow: hidden;
+            position: fixed;
+            left: 50%;
+            top: 60%;
+            transform: translateX(-50%);
+        }
+
+        .progress {
+            width: 0%;
+            height: 100%;
+            background: #f54e7b;
+            transition: width 2s ease;
+            position: relative;
+        }
+
+        .progress::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(300%); }
+        }
+
+        .back-button {
+            position: fixed;
+            top: -60px; /* Start above viewport */
+            left: 50%;
+            transform: translateX(-50%);
+            background: #f54e7b;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 0 0 8px 8px; /* Rounded bottom corners */
+            border: none;
+            cursor: pointer;
+            z-index: 300;
+            transition: all 0.3s ease;
+            display: none;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 0 20px rgba(245, 78, 123, 0.4);
+        }
+
+        .back-button:hover {
+            transform: translateX(-50%) scale(1.05);
+            box-shadow: 0 0 30px rgba(245, 78, 123, 0.6);
+        }
+
+        .back-button.visible {
+            top: 0;
+        }
+
+        .title {
+            font-family: 'Lexend', sans-serif;
+            font-size: 5rem;
+            margin-bottom: 2rem;
+            position: relative;
+            cursor: default;
+            transition: transform 0.3s ease;
+        }
+
+        .nova {
+            color: #f54e7b;
+            text-shadow: 0 0 20px rgba(245, 78, 123, 0.5);
+            transition: text-shadow 0.3s ease;
+        }
+
+        .ubg {
+            color: white;
+            margin-left: 1rem;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            transition: text-shadow 0.3s ease;
+        }
+
+        .title:hover {
+            transform: scale(1.05);
+        }
+
+        .title:hover .nova {
+            text-shadow: 0 0 40px rgba(245, 78, 123, 0.8);
+        }
+
+        .title:hover .ubg {
+            text-shadow: 0 0 40px rgba(255, 255, 255, 0.8); 
+        }
+
+        .particle {
+            position: fixed;
+            pointer-events: none;
+            display: block;
+            z-index: -1;
+        }
+
+        @keyframes floatAnimation {
+            0% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(180deg); 
+            }
+            100% {
+                transform: translateY(0) rotate(360deg);
+            }
+        }
+
+        .gradient-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at center, #0a0a0a 0%, #040405 100%);
+            z-index: -2;
+        }
+
+        .game-watermark {
+            position: fixed;
+            top: 20px;  
+            left: 20px;
+            font-family: 'Lexend', sans-serif;
+            font-size: 32px; 
+            z-index: 1000;
+            opacity: 0.7;
+            pointer-events: none;
+            text-shadow: 0 0 8px rgba(0,0,0,0.5);
+        }
+
+        .game-watermark .nova {
+            color: #f54e7b;
+        }
+
+        .game-watermark .ubg {
+            color: white;
+            margin-left: 3px;
+        }
+        
+        .three-dots {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: all 0.3s ease;
+        }
+
+        .game-card:hover .three-dots {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .three-dots::after {
+            content: "⋮";
+            color: white;
+            font-size: 24px;
+        }
+
+        .popup-menu {
+            position: absolute;
+            top: 70px;
+            left: 20px;
+            background: rgba(0,0,0,0.9);
+            border-radius: 10px;
+            padding: 10px;
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            z-index: 10;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .popup-menu.visible {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .popup-menu button {
+            background: none;
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 5px;
+            text-align: left;
+            white-space: nowrap;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .popup-menu button:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateX(5px);
+        }
+
+        .popup-menu button::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #f54e7b;
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.3s ease;
+        }
+
+        .popup-menu button:hover::after {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="gradient-bg"></div>
+    <div class="header">
+        <h1 class="title">
+            <span class="nova">NOVA</span>
+            <span class="ubg">UBG</span>
+        </h1>
+        <div class="search-bar">
+            <img src="https://www.iconpacks.net/icons/1/free-search-icon-337-thumb.png" class="search-icon" alt="Search">
+            <input type="text" class="search-input" placeholder="Search games...">
+        </div>
+    </div>
+
+    <div class="launcher">
+        <div class="game-card" data-game="https://bloxd.io">
+            <img class="game-img" src="BLOXD.IO.png" alt="Bloxd.io">
+            <div class="three-dots"></div>
+            <div class="popup-menu">
+                <button class="open-link">Open Game Source</button>
+                <button class="close-menu">Close Menu</button>
+            </div>
+            <div class="game-title">Bloxd.io</div>
+            <div class="game-stats">&#x1f465; 1.2k Playing</div>
+        </div>
+        <div class="game-card" data-game="https://nzp.gay">
+            <img class="game-img" src="NZP.png" alt="NZP">
+            <div class="three-dots"></div>
+            <div class="popup-menu">
+                <button class="open-link">Open Game Source</button>
+                <button class="close-menu">Close Menu</button>
+            </div>
+            <div class="game-title">NZP</div>
+            <div class="game-stats">&#x1f465; 856 Playing</div>
+        </div>
+        <div class="game-card" data-game="https://eaglercraft.q13x.com">
+            <img class="game-img" src="Eaflercraft.png" alt="Eaglercraft">
+            <div class="three-dots"></div>
+            <div class="popup-menu">
+                <button class="open-link">Open Game Source</button>
+                <button class="close-menu">Close Menu</button>
+            </div>
+            <div class="game-title">Eaglercraft</div>
+            <div class="game-stats">&#x1f465; 2.3k Playing</div>
+        </div>
+        <div class="game-card" data-game="https://buildnow-gg.io/buildnow-gg.embed">
+            <img class="game-img" src="buildnow-gg.png" alt="BuildNOW.gg">
+            <div class="three-dots"></div>
+            <div class="popup-menu">
+                <button class="open-link">Open Game Source</button>
+                <button class="close-menu">Close Menu</button>
+            </div>
+            <div class="game-title">BuildNOW.gg</div>
+            <div class="game-stats">&#x1f465; 945 Playing</div>
+        </div>
+        <div class="game-card" data-game="https://blockblastonline.com/game/block-blast-v1/">
+            <img class="game-img" src="Blockblast.png" alt="Block Blast">
+            <div class="three-dots"></div>
+            <div class="popup-menu">
+                <button class="open-link">Open Game Source</button>
+                <button class="close-menu">Close Menu</button>
+            </div>
+            <div class="game-title">Block Blast</div>
+            <div class="game-stats">&#x1f465; 734 Playing</div>
+        </div>
+        <div class="game-card" data-game="https://yp3d.com/ships3d/">
+            <img class="game-img" src="ships 3d.png" alt="Ships3D">
+            <div class="three-dots"></div>
+            <div class="popup-menu">
+                <button class="open-link">Open Game Source</button>
+                <button class="close-menu">Close Menu</button>
+            </div>
+            <div class="game-title">Ships3D</div>
+            <div class="game-stats">&#x1f465; 892 Playing</div>
+        </div>
+        <div class="game-card" data-game="https://krunker.io">
+            <img class="game-img" src="Krunker.png" alt="Krunker.io">
+            <div class="three-dots"></div>
+            <div class="popup-menu">
+                <button class="open-link">Open Game Source</button>
+                <button class="close-menu">Close Menu</button>
+            </div>
+            <div class="game-title">Krunker.io</div>
+            <div class="game-stats">&#x1f465; 978 Playing</div>
+        </div>
+        <div class="game-card" data-game="https://html5.gamedistribution.com/rvvASMiM/623baec23d504c83acab0b5250859ba8/index.html?timestamp=-62135596800&amp;countryCode=en-GB&amp;siteid=88&amp;channelid=1&amp;siteLocale=en-GB&amp;locale=en-GB&amp;gd_sdk_referrer_url=https%3A%2F%2Fwww.games.co.uk%2Fgame%2Fhazmob-fps&amp;gd_zone_config=eyJwYXJlbnRVUkwiOiJodHRwczovL3d3dy5nYW1lcy5jby51ay9nYW1lL2hhem1vYi1mcHMiLCJwYXJlbnREb21haW4iOiJnYW1lcy5jby51ayIsInRvcERvbWFpbiI6ImdhbWVzLmNvLnVrIiwiaGFzSW1wcmVzc2lvbiI6ZmFsc2UsImxvYWRlckVuYWJsZWQiOnRydWUsImhvc3QiOiJodG1sNS5nYW1lZGlzdHJpYnV0aW9uLmNvbSIsInZlcnNpb24iOiIxLjUuMTcifQ%253D%253D">
+            <img class="game-img" src="HAZMOB (1).png" alt="Hazmob">
+            <div class="three-dots"></div>
+            <div class="popup-menu">
+                <button class="open-link">Open Game Source</button>
+                <button class="close-menu">Close Menu</button>
+            </div>
+            <div class="game-title">Hazmob</div>
+            <div class="game-stats">&#x1f465; 1.1k Playing</div>
+        </div>
+    </div>
+
+    <div class="game-fullscreen"></div>
+    <div class="loading-screen">
+        <img src="Banner 2.png" alt="Nova Interactive">
+        <div class="progress-bar">
+            <div class="progress"></div>
+        </div>
+    </div>
+
+    <button class="back-button">Back to Launcher</button>
+    <div class="flash"></div>
+    <div class="black-flash"></div>
+
+    <script>document.querySelectorAll('.game-card').forEach(card => {
+  card.addEventListener('click', async function () {
+    const gameUrl = this.dataset.game;
+    const rect = this.getBoundingClientRect();
+    const fullscreen = document.querySelector('.game-fullscreen');
+    const flash = document.querySelector('.flash');
+    const blackFlash = document.querySelector('.black-flash');
+    const backButton = document.querySelector('.back-button');
+    const loadingScreen = document.querySelector('.loading-screen');
+    const progress = document.querySelector('.progress');
+    this.style.zIndex = '99';
+    const iframe = document.createElement('iframe');
+    iframe.className = 'game-iframe';
+    iframe.allowFullscreen = true;
+    iframe.addEventListener('click', function () {
+      this.requestPointerLock = this.requestPointerLock || this.mozRequestPointerLock || this.webkitRequestPointerLock;
+      this.requestPointerLock();
+    });
+    fullscreen.appendChild(iframe);
+    fullscreen.style.display = 'block';
+    fullscreen.style.transform = `
+            translate(${rect.left}px, ${rect.top}px) 
+            scale(${rect.width / window.innerWidth}, ${rect.height / window.innerHeight})
+        `;
+    requestAnimationFrame(async () => {
+      fullscreen.style.transition = 'transform 0.3s ease';
+      fullscreen.style.transform = 'translate(0, 0) scale(1)';
+      await new Promise(resolve => setTimeout(resolve, 300));
+      flash.style.transition = 'opacity 0.2s ease';
+      flash.style.opacity = '1';
+      await new Promise(resolve => setTimeout(resolve, 200));
+      flash.style.opacity = '0';
+      loadingScreen.style.display = 'flex';
+      progress.style.width = '0%';
+      await new Promise(resolve => setTimeout(resolve, 100));
+      progress.style.width = '100%';
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      blackFlash.style.transition = 'opacity 0.2s ease';
+      blackFlash.style.opacity = '1';
+      await new Promise(resolve => setTimeout(resolve, 200));
+      blackFlash.style.opacity = '0';
+      loadingScreen.style.display = 'none';
+      const watermark = document.createElement('div');
+      watermark.className = 'game-watermark';
+      watermark.innerHTML = '<span class="nova">NOVA</span><span class="ubg">UBG</span>';
+      fullscreen.appendChild(watermark);
+      iframe.src = gameUrl;
+      backButton.style.display = 'block';
+      await new Promise(resolve => setTimeout(resolve, 50));
+      backButton.classList.add('visible');
+      this.style.zIndex = '';
+    });
+  });
+});
+document.querySelector('.back-button').addEventListener('click', async function () {
+  const fullscreen = document.querySelector('.game-fullscreen');
+  const iframe = fullscreen.querySelector('.game-iframe');
+  const beforeUnloadPromise = new Promise(resolve => {
+    const channel = new MessageChannel();
+    channel.port1.onmessage = event => {
+      resolve(event.data);
+    };
+    try {
+      iframe.contentWindow.postMessage('checkBeforeUnload', '*', [channel.port2]);
+    } catch (e) {
+      resolve(true);
+    }
+  });
+  const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(true), 100));
+  const shouldClose = await Promise.race([beforeUnloadPromise, timeoutPromise]);
+  if (shouldClose) {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    document.querySelector('.game-watermark').remove();
+    fullscreen.innerHTML = '';
+    fullscreen.style.display = 'none';
+    this.classList.remove('visible');
+    await new Promise(resolve => setTimeout(resolve, 300));
+    this.style.display = 'none';
+  }
+});
+window.addEventListener('message', event => {
+  if (event.data === 'checkBeforeUnload') {
+    const port = event.ports[0];
+    const shouldClose = window.confirm('Are you sure you want to leave the game?');
+    port.postMessage(shouldClose);
+  }
+});
+document.querySelector('.search-input').addEventListener('input', function (e) {
+  const searchTerm = e.target.value.toLowerCase();
+  document.querySelectorAll('.game-card').forEach(card => {
+    const title = card.querySelector('.game-title').textContent.toLowerCase();
+    if (title.includes(searchTerm)) {
+      card.style.display = 'block';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+});
+document.querySelector('.title').addEventListener('mousemove', e => {
+  const title = e.currentTarget;
+  const rect = title.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  const centerX = rect.width / 2;
+  const centerY = rect.height / 2;
+  const angleX = (y - centerY) / 20;
+  const angleY = (centerX - x) / 20;
+  title.style.transform = `perspective(1000px) rotateX(${angleX}deg) rotateY(${angleY}deg) scale(1.05)`;
+});
+document.querySelector('.title').addEventListener('mouseleave', e => {
+  e.currentTarget.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
+});
+const loadingScreen = document.querySelector('.loading-screen');
+loadingScreen.innerHTML = `
+    <h1 class="title">
+        <span class="nova">NOVA</span>
+        <span class="ubg">UBG</span>
+    </h1>
+    <div class="progress-bar">
+        <div class="progress"></div>
+    </div>
+`;
+function createParticle() {
+  const particle = document.createElement('div');
+  particle.className = 'particle';
+  const size = Math.random() * 3 + 1;
+  particle.style.width = size + 'px';
+  particle.style.height = size + 'px';
+  const x = Math.random() * window.innerWidth;
+  const y = Math.random() * window.innerHeight;
+  particle.style.left = x + 'px';
+  particle.style.top = y + 'px';
+  particle.style.background = `rgba(245, 78, 123, ${Math.random() * 0.5})`;
+  particle.style.borderRadius = '50%';
+  const duration = Math.random() * 10 + 5;
+  particle.style.animation = `floatAnimation ${duration}s infinite`;
+  document.body.appendChild(particle);
+  setTimeout(() => {
+    document.body.removeChild(particle);
+    createParticle();
+  }, duration * 1000);
+}
+for (let i = 0; i < 50; i++) {
+  createParticle();
+}
+document.querySelectorAll('.three-dots').forEach(dots => {
+  dots.addEventListener('click', e => {
+    e.stopPropagation();
+    const menu = dots.nextElementSibling;
+    document.querySelectorAll('.popup-menu.visible').forEach(m => {
+      if (m !== menu) m.classList.remove('visible');
+    });
+    menu.classList.toggle('visible');
+  });
+});
+document.querySelectorAll('.open-link').forEach(button => {
+  button.addEventListener('click', e => {
+    e.stopPropagation();
+    const gameCard = e.target.closest('.game-card');
+    const gameUrl = gameCard.dataset.game;
+    const menu = e.target.closest('.popup-menu');
+    menu.style.opacity = '0';
+    menu.style.transform = 'translateY(-10px)';
+    setTimeout(() => {
+      window.open(gameUrl, '_blank');
+      menu.classList.remove('visible');
+      menu.style.opacity = '';
+      menu.style.transform = '';
+    }, 300);
+  });
+});
+document.querySelectorAll('.close-menu').forEach(button => {
+  button.addEventListener('click', e => {
+    e.stopPropagation();
+    const menu = e.target.closest('.popup-menu');
+    menu.style.opacity = '0';
+    menu.style.transform = 'translateY(-10px)';
+    setTimeout(() => {
+      menu.classList.remove('visible');
+      menu.style.opacity = '';
+      menu.style.transform = '';
+    }, 300);
+  });
+});
+document.addEventListener('click', e => {
+  if (!e.target.closest('.popup-menu') && !e.target.closest('.three-dots')) {
+    document.querySelectorAll('.popup-menu.visible').forEach(menu => {
+      menu.style.opacity = '0';
+      menu.style.transform = 'translateY(-10px)';
+      setTimeout(() => {
+        menu.classList.remove('visible');
+        menu.style.opacity = '';
+        menu.style.transform = '';
+      }, 300);
+    });
+  }
+});</script>
+
+</body>
+</html>
